@@ -1,0 +1,412 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MARS PRACTICE</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b1220;color:white;font-family:Arial,sans-serif}
+header{padding:18px 5%;background:#131f35;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:900;letter-spacing:2px}
+.logo span{color:#a99aff}
+.profile{width:55px;height:55px;border-radius:50%;object-fit:cover;border:2px solid #9b8cff}
+main{max-width:760px;margin:35px auto;padding:15px}
+.card{background:#17263d;border:1px solid #344763;padding:26px;border-radius:20px;box-shadow:0 15px 40px #0005}
+h1{font-size:30px}
+p{color:#b9c5d7;line-height:1.6}
+button{padding:14px 20px;border:0;border-radius:12px;background:#8978ff;color:white;font-weight:bold;cursor:pointer;font-size:15px}
+button:disabled{cursor:default}
+.hidden{display:none!important}
+.options{display:grid;gap:12px;margin-top:20px}
+.option{width:100%;text-align:left;background:#263a56;border:1px solid #455b79;color:white}
+.correct{background:#087d52!important;border:2px solid #20dc9b}
+.wrong{background:#a52e43!important;border:2px solid #ff7287}
+.progress{height:8px;background:#344763;border-radius:20px;margin:20px 0;overflow:hidden}
+#bar{height:100%;background:#9b8cff;width:0}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:20px 0}
+.stat{padding:17px;background:#0d192b;border-radius:12px}
+.stat b{display:block;font-size:25px}
+.rounds{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:20px 0}
+.round{padding:13px;background:#0d192b;border:1px solid #344763;border-radius:12px}
+.done{border-color:#20dc9b}
+.feedback{padding:15px;border-radius:12px;margin-top:18px;line-height:1.6}
+.good{background:#104333}
+.bad{background:#52232e}
+.certificate{width:100%;margin-top:20px;border-radius:12px}
+footer{text-align:center;color:#8493a9;padding:25px}
+@media(max-width:500px){main{margin:15px auto}.card{padding:19px}h1{font-size:25px}}
+</style>
+</head>
+<body>
+
+<header>
+ <div>
+  <div class="logo">MARS <span>PRACTICE</span></div>
+  <small>CLASS XII PHYSICS | ASSAM</small>
+ </div>
+ <img src="mars.jpg" class="profile" alt="Suhail">
+</header>
+
+<main>
+
+<section id="welcome" class="card">
+ <h1>Hello, most cutest girl in the world! 💗</h1>
+ <h2>How are you?</h2>
+ <p>Your personal Physics preparation journey starts here.</p>
+ <button onclick="show('disclaimer')">I'm fine 💗</button>
+</section>
+
+<section id="disclaimer" class="card hidden">
+ <h1>A little message for you ❤️</h1>
+ <p>This website is made by <b>Suhail Ahmed Laskar</b>.</p>
+ <p>For you only, to help you in your exam preparation.</p>
+ <h2>Are you ready my girl?</h2>
+ <button onclick="dashboard()">YES, LET'S START!</button>
+</section>
+
+<section id="home" class="card hidden">
+ <h1>Welcome to MARS PRACTICE</h1>
+ <p>Keep learning. Keep improving. You can do it!</p>
+ <div class="stats">
+  <div class="stat"><b>160</b>Questions</div>
+  <div class="stat"><b>8</b>Rounds</div>
+  <div class="stat"><b>20</b>Points each</div>
+  <div class="stat"><b id="total">0</b>Total score</div>
+ </div>
+ <div class="rounds" id="rounds"></div>
+ <button id="start" onclick="startRound()">Start Round 1</button>
+</section>
+
+<section id="quiz" class="card hidden">
+ <p id="roundName"></p>
+ <div class="progress"><div id="bar"></div></div>
+ <p id="number"></p>
+ <h2 id="question"></h2>
+ <div class="options" id="options"></div>
+ <div id="feedback"></div>
+ <p id="score"></p>
+ <button id="next" class="hidden" onclick="nextQuestion()">Next Question</button>
+</section>
+
+<section id="result" class="card hidden">
+ <h1 id="resultTitle"></h1>
+ <h2 id="resultScore"></h2>
+ <p id="resultMessage"></p>
+ <button onclick="continueRound()">Continue</button>
+ <button id="retry" onclick="startRound(true)">Try Again</button>
+</section>
+
+<section id="final" class="card hidden">
+ <h1>Congratulations My Girl! 🏆</h1>
+ <h2 id="finalScore"></h2>
+ <p>You completed all eight rounds of MARS PRACTICE!</p>
+ <img src="certificate.jpg" class="certificate" alt="Certificate">
+ <button onclick="location.reload()">Practice Again</button>
+</section>
+
+</main>
+<footer>Made with care by Suhail Ahmed Laskar ❤️</footer>
+
+<script>
+// Question format: Question, options, correct answer index.
+// Each round has exactly 20 questions.
+
+const bank = [
+[
+["SI unit of electric charge?",["Ampere","Coulomb","Volt","Farad"],1],
+["Charge of an electron?",["+1.6×10⁻¹⁹ C","−1.6×10⁻¹⁹ C","Zero","−1.6×10⁻¹⁶ C"],1],
+["Like charges:",["Attract","Repel","Neutralise","None"],1],
+["Coulomb force is proportional to:",["r²","r","1/r²","1/r"],2],
+["Electric field unit?",["N/C","C/N","J/C","N m"],0],
+["Electric field is force per unit:",["Mass","Positive charge","Area","Current"],1],
+["Electric field lines never:",["Start at positive","End at negative","Intersect","Have direction"],2],
+["Electric potential is:",["Vector","Scalar","Tensor","None"],1],
+["Potential unit?",["Coulomb","Volt","Farad","Tesla"],1],
+["Capacitance formula?",["Q/V","V/Q","QV","Q+V"],0],
+["Capacitance SI unit?",["Henry","Farad","Tesla","Weber"],1],
+["Parallel capacitors equivalent capacitance?",["C1+C2","C1C2","C1/C2","Zero"],0],
+["Series capacitors equivalent?",["C1+C2","C1C2/(C1+C2)","C1-C2","Zero"],1],
+["Energy stored in capacitor?",["CV²","½CV²","2CV²","CV"],1],
+["Electric flux unit?",["N m²/C","N/C","Volt","Farad"],0],
+["Gauss law relates flux to:",["Mass","Enclosed charge","Resistance","Current"],1],
+["Field inside conductor in electrostatic equilibrium?",["Zero","Infinite","Maximum","Variable"],0],
+["Permittivity symbol?",["μ₀","ε₀","G","h"],1],
+["Potential due to point charge varies as:",["r","1/r","r²","1/r²"],1],
+["Electric field lines originate from:",["Negative","Positive","Neutral","Both equally"],1]
+],
+[
+["Electric current is rate of flow of:",["Mass","Charge","Energy","Resistance"],1],
+["Current SI unit?",["Volt","Ampere","Ohm","Watt"],1],
+["Ohm's law?",["V=IR","P=VI²","Q=CV","F=qE"],0],
+["Resistance formula?",["ρL/A","ρA/L","LA/ρ","ρ/L"],0],
+["Resistivity unit?",["Ω","Ω m","Ω/m","S"],1],
+["Series resistance:",["R1+R2","R1R2","R1/R2","Zero"],0],
+["Parallel resistance reciprocal:",["Sum","Sum of reciprocals","Product","Difference"],1],
+["Kirchhoff junction rule based on:",["Energy","Charge","Mass","Force"],1],
+["Kirchhoff loop rule based on:",["Energy","Charge","Mass","Speed"],0],
+["Electrical power formula?",["VI","V/I","I/V","IR"],0],
+["Commercial energy unit?",["Joule","kWh","Watt","Volt"],1],
+["One kWh equals:",["3600 J","3.6×10⁶ J","360 J","36 J"],1],
+["Ideal cell internal resistance?",["Zero","Infinite","1Ω","Variable"],0],
+["Ammeter connected in:",["Series","Parallel","Both","Neither"],0],
+["Voltmeter connected in:",["Series","Parallel","Both","Neither"],1],
+["Potentiometer uses:",["Null method","Heating","Magnetism","Reflection"],0],
+["Drift velocity in metal is generally:",["Small","Infinite","Speed of light","Very large"],0],
+["Power of resistor?",["I²R","I/R","R/I","IR²"],0],
+["Resistance increases with length:",["True","False","Never","Only in vacuum"],0],
+["Metals usually have temperature coefficient:",["Positive","Negative","Zero","Infinite"],0]
+],
+[
+["Magnetic field SI unit?",["Weber","Tesla","Henry","Gauss"],1],
+["Magnetic field lines form:",["Open curves","Closed loops","Straight lines","None"],1],
+["Magnetic force on charge?",["qvB sinθ","qE","qv/B","qB"],0],
+["Charge moving parallel to B experiences force:",["Maximum","Zero","Infinite","qvB"],1],
+["Force on current wire?",["BIL sinθ","BI/L","IL/B","B/I"],0],
+["Fleming left-hand rule is used for:",["Motor","Generator","Transformer","Capacitor"],0],
+["Long solenoid field is approximately:",["Uniform","Zero","Random","Infinite"],0],
+["Magnetic dipole moment unit?",["A m²","Tesla","Weber","N/C"],0],
+["Galvanometer detects:",["Small current","Voltage only","Power","Resistance"],0],
+["Ammeter conversion uses:",["Shunt","High series resistance","Capacitor","Inductor"],0],
+["Voltmeter conversion uses:",["Low resistance parallel","High resistance series","Shunt","Wire"],1],
+["Straight wire field varies as:",["r","1/r","r²","1/r²"],1],
+["Same direction parallel currents:",["Attract","Repel","No force","Rotate"],0],
+["Biot-Savart law describes:",["Magnetic field","Electric potential","Resistance","Heat"],0],
+["Diamagnetic susceptibility is:",["Negative","Positive","Infinite","Zero always"],0],
+["Ferromagnetic materials are:",["Strongly attracted","Repelled","Unaffected","Nonmagnetic"],0],
+["Magnetic flux unit?",["Weber","Tesla","Volt","Ampere"],0],
+["Magnetic field inside ideal long solenoid:",["Nearly uniform","Always zero","Random","Infinite"],0],
+["Force on stationary charge in magnetic field:",["Zero","Maximum","Infinite","qB"],0],
+["Magnetic field direction around wire is given by:",["Right-hand thumb rule","Lenz law","Ohm law","Gauss law"],0]
+],
+[
+["Electromagnetic induction involves change in:",["Magnetic flux","Mass","Resistance","Temperature"],0],
+["Faraday law relates EMF to:",["Rate of flux change","Resistance","Current squared","Mass"],0],
+["Lenz law follows conservation of:",["Energy","Charge","Mass","Momentum"],0],
+["Magnetic flux unit?",["Weber","Tesla","Henry","Farad"],0],
+["Inductance unit?",["Henry","Weber","Tesla","Ohm"],0],
+["Self induction occurs in:",["Same coil","Two separate coils only","Capacitor","Resistor"],0],
+["Mutual induction involves:",["Two coils","One resistor","Battery only","Capacitor"],0],
+["Generator converts:",["Mechanical to electrical","Electrical to mechanical","Heat to light","Chemical to heat"],0],
+["Indian AC frequency?",["25 Hz","50 Hz","60 Hz","100 Hz"],1],
+["RMS current?",["I0","I0/2","I0/√2","√2I0"],2],
+["Average AC over full cycle?",["I0","Zero","I0/2","2I0"],1],
+["Pure resistor phase difference:",["0°","90°","180°","45°"],0],
+["In pure inductor current:",["Leads","Lags 90°","In phase","Zero"],1],
+["In pure capacitor current:",["Lags","Leads 90°","In phase","Zero"],1],
+["Inductive reactance?",["ωL","1/ωL","ωC","1/ωC"],0],
+["Capacitive reactance?",["ωC","1/ωC","ωL","1/ωL"],1],
+["At resonance:",["XL=XC","R=0","I=0","Z infinite"],0],
+["Pure resistor power factor:",["0","0.5","1","−1"],2],
+["Transformer works on:",["Mutual induction","Photoelectric effect","Fission","Diffraction"],0],
+["Step-up transformer increases:",["Voltage","Frequency","Power always","Resistance"],0]
+],
+[
+["Electromagnetic waves are:",["Longitudinal","Transverse","Mechanical","Matter waves"],1],
+["EM waves travel through:",["Vacuum","Only solids","Only liquids","No medium"],0],
+["Speed of EM waves in vacuum:",["3×10⁶","3×10⁸","3×10¹⁰","340"],1],
+["Longest wavelength?",["Gamma","X-rays","Visible","Radio"],3],
+["Highest frequency?",["Radio","Microwave","UV","Gamma"],3],
+["Microwaves are used in:",["Radar","Sound recording","Fission","Chemistry only"],0],
+["Infrared radiation is associated with:",["Heat","Nuclear fission","Charge","Mass"],0],
+["Visible light lies between:",["Radio and microwave","IR and UV","X-ray and gamma","None"],1],
+["Law of reflection:",["i=r","i+r=90","i=2r","i=0"],0],
+["Plane mirror image is:",["Virtual and erect","Real and inverted","Real and erect","None"],0],
+["Mirror formula:",["1/f=1/v+1/u","f=u+v","f=uv","1/f=u+v"],0],
+["Lens power unit?",["Metre","Dioptre","Watt","Tesla"],1],
+["Convex lens power:",["Positive","Negative","Zero","Infinite"],0],
+["Concave lens is:",["Converging","Diverging","Mirror","None"],1],
+["Refractive index:",["c/v","v/c","cv","c+v"],0],
+["Total internal reflection occurs from:",["Rarer to denser","Denser to rarer","Vacuum only","Air only"],1],
+["Optical fibre works on:",["TIR","Diffraction","Dispersion","Interference"],0],
+["Plane mirror focal length:",["Zero","Infinite","One metre","Negative"],1],
+["Real image can be:",["Obtained on screen","Only behind mirror","Always erect","None"],0],
+["Power of lens is:",["1/f (metre)","f²","1/f²","f+1"],0]
+],
+[
+["Bending of light around obstacle:",["Reflection","Diffraction","Polarisation","Dispersion"],1],
+["Interference results from:",["Superposition","Absorption","Refraction only","Heating"],0],
+["Sustained interference needs:",["Coherent sources","Different frequencies","Random phase","None"],0],
+["YDSE fringe width:",["λD/d","λd/D","dD/λ","λ/dD"],0],
+["Increasing wavelength makes fringe width:",["Increase","Decrease","Same","Zero"],0],
+["Increasing slit separation makes fringe width:",["Increase","Decrease","Same","Double"],1],
+["Central bright fringe path difference:",["λ/2","λ","Zero","3λ/2"],2],
+["Dark fringe condition:",["nλ","(2n+1)λ/2","2nλ","Zero"],1],
+["Polarisation proves light is:",["Longitudinal","Transverse","Mechanical","Stationary"],1],
+["Splitting white light:",["Diffraction","Dispersion","Interference","Reflection"],1],
+["Most deviated prism colour:",["Red","Yellow","Violet","Orange"],2],
+["Least deviated prism colour:",["Violet","Blue","Green","Red"],3],
+["Huygens principle uses:",["Secondary wavelets","Electrons","Protons","Neutrons"],0],
+["Point source wavefront:",["Plane","Spherical","Straight","None"],1],
+["Single slit central maximum is:",["Widest","Narrowest","Absent","Dark"],0],
+["Diffraction angular width proportional to:",["λ/a","a/λ","aλ","1/aλ"],0],
+["Brewster law:",["μ=tan iB","μ=sin iB","μ=cos iB","μ=1"],0],
+["At Brewster angle reflected and refracted rays are:",["Perpendicular","Parallel","Same","None"],0],
+["Fringe width depends on:",["Wavelength","Mass","Charge","None"],0],
+["Interference bright fringe condition:",["nλ","(n+½)λ","Zero only","None"],0]
+],
+[
+["Photoelectric effect shows:",["Particle nature of light","Wave only","Sound","Magnetism"],0],
+["Minimum frequency for emission:",["Threshold frequency","Natural frequency","Angular frequency","None"],0],
+["Photon energy:",["hν","h/ν","ν/h","hν²"],0],
+["Planck constant unit:",["J s","J/s","N/C","Wb"],0],
+["Increasing intensity generally increases:",["Photoelectric current","Work function","Threshold frequency","Photon energy"],0],
+["Stopping potential depends on:",["Frequency","Intensity only","Area only","Time"],0],
+["de Broglie wavelength:",["h/p","hp","p/h","hE"],0],
+["Increasing momentum makes wavelength:",["Decrease","Increase","Same","Infinite"],0],
+["Bohr model explains:",["Hydrogen spectrum","All molecules","Metals","Neutrons"],0],
+["Bohr angular momentum:",["nh/2π","h/n","n²h","2πnh"],0],
+["Bohr radius proportional to:",["n","n²","1/n","1/n²"],1],
+["Hydrogen ground energy:",["−13.6 eV","+13.6 eV","−3.4 eV","0"],0],
+["Electron jumping higher level:",["Absorbs energy","Emits energy","No change","Disappears"],0],
+["Lyman series lies in:",["UV","Visible","IR","Radio"],0],
+["Balmer series lies mainly in:",["Visible","Microwave","Gamma","Radio"],0],
+["Work function means minimum energy to:",["Remove electron","Create proton","Stop neutron","Melt metal"],0],
+["Maximum kinetic energy:",["eV₀","V₀/e","e+V₀","e/V₀"],0],
+["Electron diffraction experiment:",["Davisson-Germer","Rutherford","Millikan","Gold foil"],0],
+["Photon rest mass:",["Zero","Positive","Negative","Variable"],0],
+["Photon energy relation:",["ΔE=hν","ΔE=h/ν","ΔE=ν/h","None"],0]
+],
+[
+["Nucleus contains:",["Protons and neutrons","Electrons only","Photons","Only protons"],0],
+["Atomic number equals:",["Protons","Neutrons","Nucleons","Mass"],0],
+["Mass number equals:",["Protons + neutrons","Electrons","Neutrons only","Protons only"],0],
+["Isotopes have same:",["Atomic number","Mass number","Neutrons","Energy"],0],
+["Nuclear radius proportional to:",["A","A²","A^(1/3)","1/A"],2],
+["Nuclear density is:",["Nearly constant","Always zero","Infinite","Random"],0],
+["Binding energy formula:",["Δmc²","Δm/c²","Δm²c","mc"],0],
+["Greater binding energy per nucleon usually means:",["Greater stability","Less stability","No nucleus","Zero mass"],0],
+["Nuclear fission means:",["Splitting heavy nucleus","Joining light nuclei","Reflection","Absorption"],0],
+["Nuclear fusion means:",["Joining light nuclei","Splitting heavy nuclei","Chemical burning","Diffraction"],0],
+["Sun produces energy by:",["Fusion","Fission","Combustion","Friction"],0],
+["Alpha particle is:",["Helium nucleus","Electron","Photon","Neutron"],0],
+["Beta-minus particle is:",["Electron","Proton","Helium nucleus","Photon"],0],
+["Gamma rays are:",["Electromagnetic radiation","Charged particles","Neutrons","Atoms"],0],
+["Half-life is time for nuclei to become:",["Half","Double","Zero","Four times"],0],
+["Radioactive decay is:",["Spontaneous nuclear process","Chemical reaction","Stopped by cooling","Stopped by pressure"],0],
+["Semiconductor conductivity is between:",["Conductor and insulator","Two metals","Two insulators","None"],0],
+["Intrinsic semiconductor has equal:",["Electron and hole concentrations","Protons and neutrons","Voltage and current","None"],0],
+["P-type semiconductor uses:",["Trivalent impurity","Pentavalent impurity","Noble gas","No impurity"],0],
+["N-type semiconductor uses:",["Pentavalent impurity","Trivalent impurity","No impurity","Divalent impurity"],0]
+]
+];
+
+const names=[
+"Electrostatics","Current Electricity","Magnetism",
+"EMI and AC","EM Waves and Ray Optics",
+"Wave Optics","Dual Nature and Atoms","Nuclei and Semiconductors"
+];
+
+let round=0,q=0,points=0,results=Array(8).fill(null),retrying=false;
+
+function show(id){
+ document.querySelectorAll("main section").forEach(s=>s.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+ window.scrollTo(0,0);
+}
+
+function dashboard(){
+ renderDashboard();
+ show("home");
+}
+
+function renderDashboard(){
+ total.textContent=results.reduce((a,b)=>a+(b||0),0);
+ rounds.innerHTML=names.map((n,i)=>
+ `<div class="round ${results[i]!==null?'done':''}">
+ <b>Round ${i+1}</b><br>${n}<br>
+ ${results[i]===null?'Not completed':results[i]+'/20'}
+ </div>`).join("");
+ start.textContent="Start Round "+(round+1);
+}
+
+function startRound(retry=false){
+ retrying=retry;
+ q=0;points=0;
+ roundName.textContent="ROUND "+(round+1)+" — "+names[round];
+ show("quiz");
+ renderQuestion();
+}
+
+function renderQuestion(){
+ const item=bank[round][q];
+ number.textContent="Question "+(q+1)+" / 20";
+ question.textContent=item[0];
+ score.textContent="Score: "+points+"/20";
+ bar.style.width=(q/20*100)+"%";
+ feedback.innerHTML="";
+ next.classList.add("hidden");
+ next.textContent=q===19?"Finish Round":"Next Question";
+ options.innerHTML="";
+
+ item[1].forEach((choice,i)=>{
+  const b=document.createElement("button");
+  b.className="option";
+  b.textContent="ABCD"[i]+". "+choice;
+  b.onclick=()=>answer(i);
+  options.appendChild(b);
+ });
+}
+
+function answer(selected){
+ const item=bank[round][q];
+ const correct=item[2];
+ const buttons=options.querySelectorAll("button");
+
+ buttons.forEach((b,i)=>{
+  b.disabled=true;
+  if(i===correct)b.classList.add("correct");
+  if(i===selected && i!==correct)b.classList.add("wrong");
+ });
+
+ if(selected===correct){
+  points++;
+  feedback.className="feedback good";
+  feedback.textContent="Correct answer! Well done! 💚";
+ }else{
+  feedback.className="feedback bad";
+  feedback.textContent="Wrong answer! Correct answer: "+item[1][correct]+" ❤️";
+ }
+
+ score.textContent="Score: "+points+"/20";
+ bar.style.width=((q+1)/20*100)+"%";
+ next.classList.remove("hidden");
+}
+
+function nextQuestion(){
+ if(q<19){
+  q++;
+  renderQuestion();
+ }else finishRound();
+}
+
+function finishRound(){
+ if(!retrying || results[round]===null || points>results[round]){
+  results[round]=points;
+ }
+
+ resultTitle.textContent=points>=15?
+ "Well done my girl! 💗":"You need more practice my girl";
+ resultScore.textContent=points+"/20";
+ resultMessage.textContent=points>=15?
+ "Love youu! You did amazing. Keep going!":
+ "Don't worry, I'm with you. Keep practising. You can do it!";
+ retry.classList.toggle("hidden",points>=15);
+ show("result");
+}
+
+function continueRound(){
+ if(round===7){
+  finalScore.textContent="Total Score: "+
+   results.reduce((a,b)=>a+(b||0),0)+"/160";
+  show("final");
+ }else{
+  round++;
+  dashboard();
+ }
+}
+</script>
+</body>
+  </html>
+  
